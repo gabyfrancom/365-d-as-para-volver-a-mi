@@ -1,6 +1,6 @@
-const CACHE = 'volver-a-mi-v1';
+const CACHE = 'volver-a-mi-v4';
 const ARCHIVOS = ['./', './index.html', './data.js', './manifest.json',
-  './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+  './icon-192.png', './icon-512.png', './apple-touch-icon.png', './fondo-claro.jpg', './fondo-oscuro.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)));
   self.skipWaiting();

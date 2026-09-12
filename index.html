@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e8a0bf">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="365 días">
+<title>365 días para volver a mí</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+:root{
+  --rose:#e8a0bf; --rose-deep:#c96f92; --lilac:#b48ec9; --gold:#d9a441;
+}
+body{
+  --bg1:#fff8fa; --bg2:#fdeef4; --bg3:#f3e6f2;
+  --hdr1:#f9d9e5; --hdr2:#e2d3ec;
+  --card:rgba(255,255,255,.88); --texto:#5b3a4e; --texto2:#8a6379;
+  --acento:#c96f92; --acento2:#b48ec9; --linea:#f7d6e2; --chip:#f7d6e2;
+  --shadow:0 10px 30px rgba(201,111,146,.18);
+  --petalo-op:.55;
+}
+body.oscuro{
+  --bg1:#211d22; --bg2:#28222a; --bg3:#2d2530;
+  --hdr1:#2a242c; --hdr2:#332b37;
+  --card:rgba(50,43,52,.90); --texto:#ece3ea; --texto2:#b9a6b3;
+  --acento:#a3b8e8; --acento2:#b48ec9; --linea:#4a3f4d; --chip:#3c3440;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --petalo-op:.3;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  background:
+    linear-gradient(165deg,rgba(255,248,250,.82) 0%,rgba(253,238,244,.75) 55%,rgba(243,230,242,.82) 100%),
+    url('fondo-claro.jpg') center/cover fixed no-repeat,
+    var(--bg1);
+  color:var(--texto); min-height:100vh; min-height:100dvh;
+  padding-bottom:calc(90px + env(safe-area-inset-bottom));
+  transition:background .4s,color .4s;
+}
+body.oscuro{
+  background:
+    linear-gradient(165deg,rgba(33,29,34,.72) 0%,rgba(40,34,42,.66) 55%,rgba(45,37,48,.75) 100%),
+    url('fondo-oscuro.jpg') center/cover fixed no-repeat,
+    var(--bg1);
+}
+.petalos{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.petalo{position:absolute;top:-40px;font-size:18px;opacity:var(--petalo-op);animation:caer linear infinite}
+@keyframes caer{
+  0%{transform:translateY(-5vh) rotate(0deg)}
+  100%{transform:translateY(110vh) rotate(360deg)}
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:linear-gradient(90deg,var(--hdr1),var(--hdr2) 60%,var(--hdr1));
+  border-bottom:1px solid var(--linea);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  transition:background .4s;
+}
+header .tit{text-align:center;flex:1}
+header h1{font-family:Georgia,serif;font-size:1.05rem;font-weight:600;color:var(--texto);letter-spacing:.4px}
+header p{font-size:.68rem;color:var(--texto2);margin-top:2px}
+#btn-tema{
+  border:2px solid var(--linea);background:var(--card);border-radius:999px;
+  width:42px;height:42px;font-size:1.15rem;cursor:pointer;flex-shrink:0;
+  box-shadow:var(--shadow);transition:transform .15s;
+}
+#btn-tema:active{transform:scale(.9)}
+main{max-width:560px;margin:0 auto;padding:18px 16px;position:relative;z-index:1}
+.card{
+  background:var(--card);border-radius:26px;box-shadow:var(--shadow);
+  padding:26px 22px 28px;position:relative;overflow:hidden;
+  border:1px solid var(--linea);transition:background .4s,border-color .4s;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+/* formato libro: título del día */
+.dia-titulo{
+  font-family:Georgia,serif;font-size:1.25rem;font-weight:700;
+  color:var(--texto);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.dia-titulo .em{font-size:1.4rem}
+.fecha{font-size:.72rem;text-transform:capitalize;color:var(--texto2);margin-bottom:10px;letter-spacing:.5px}
+.reflexion{
+  font-family:Georgia,serif;font-style:italic;font-size:1.02rem;line-height:1.8;
+  color:var(--texto);white-space:pre-line;
+}
+.invitacion{
+  margin-top:14px;font-size:.85rem;color:var(--acento2);
+  font-style:italic;font-family:Georgia,serif;
+}
+.simbolo-tag{
+  display:inline-flex;align-items:center;gap:5px;margin-top:14px;
+  background:var(--chip);border-radius:999px;padding:4px 12px;
+  font-size:.72rem;font-weight:600;color:var(--acento);
+}
+/* secciones como el libro */
+.sec-titulo{
+  font-size:.95rem;font-weight:700;color:var(--acento);
+  margin:26px 0 12px;letter-spacing:.3px;
+}
+.fila{margin-bottom:14px;display:flex;align-items:flex-end;gap:4px}
+.fila .lbl{font-size:.92rem;font-weight:600;color:var(--texto);white-space:nowrap;padding-bottom:7px}
+.fila input{
+  flex:1;border:none;border-bottom:1px solid var(--texto2);background:transparent;
+  padding:6px 2px;font-size:.95rem;color:var(--texto);font-family:inherit;outline:none;
+}
+.fila input:focus{border-bottom:2px solid var(--acento)}
+.energia-fila{display:flex;gap:8px}
+.energia-fila button{
+  flex:1;border:2px solid var(--linea);background:transparent;border-radius:12px;
+  padding:9px 4px;font-size:.78rem;font-weight:600;color:var(--texto2);cursor:pointer;transition:all .2s;
+}
+.energia-fila button.sel{background:var(--acento);border-color:var(--acento);color:#fff}
+textarea.libre{
+  width:100%;border:none;background:transparent;outline:none;resize:vertical;
+  min-height:120px;font-family:Georgia,serif;font-style:italic;font-size:.98rem;
+  line-height:2.4;color:var(--texto);
+  background-image:repeating-linear-gradient(transparent,transparent 37px,var(--linea) 37px,var(--linea) 38px);
+}
+.btn-guardar{
+  width:100%;border:none;border-radius:16px;padding:15px;font-size:1rem;font-weight:700;
+  background:linear-gradient(100deg,#b48ec9 0%,#e8a0bf 48%,#c96f92 100%);
+  color:#fff;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 8px 22px rgba(180,142,201,.5);transition:transform .15s,margin-top .2s;
+}
+.btn-guardar::after{
+  content:'';position:absolute;top:0;left:-90%;width:45%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);
+  animation:brillo 3.2s ease-in-out infinite;
+}
+@keyframes brillo{0%{left:-90%}55%{left:140%}100%{left:140%}}
+.btn-resp{
+  width:100%;border:2px solid var(--acento2);border-radius:16px;padding:13px;
+  font-size:.92rem;font-weight:700;background:transparent;color:var(--acento2);
+  cursor:pointer;margin-top:12px;font-family:inherit;transition:all .2s;
+}
+.btn-resp:active{background:var(--chip);transform:scale(.98)}
+.btn-guardar:active{transform:scale(.97)}
+.btn-guardar.guardado{background:linear-gradient(90deg,#a5d6a7,#66bb6a)}
+.nav-dias{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:8px}
+.nav-dias button{
+  border:2px solid var(--linea);background:transparent;color:var(--acento);
+  border-radius:999px;padding:9px 14px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.nav-dias button:active{background:var(--chip)}
+.hoy-btn{background:linear-gradient(90deg,var(--lilac),var(--rose))!important;color:#fff!important;border:none!important}
+/* prólogo / epílogo del mes */
+.mes-nota{
+  background:var(--card);border:1px solid var(--linea);border-left:5px solid var(--acento2);
+  border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.mes-nota h3{font-family:Georgia,serif;font-size:1.05rem;color:var(--acento2);margin-bottom:8px;text-transform:capitalize}
+.mes-nota p{font-family:Georgia,serif;font-style:italic;font-size:.92rem;line-height:1.7;color:var(--texto2);white-space:pre-line}
+/* barra inferior */
+nav.barra{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--linea);
+  display:flex;justify-content:space-around;
+  padding:8px 4px calc(8px + env(safe-area-inset-bottom));transition:background .4s;
+}
+nav.barra button{
+  border:none;background:none;font-size:.62rem;font-weight:700;color:var(--texto2);
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+  padding:4px 8px;border-radius:12px;font-family:inherit;
+}
+nav.barra button .ic{font-size:1.25rem}
+nav.barra button.activo{color:var(--acento)}
+/* vistas */
+.vista{display:none}
+.vista.activa{display:block;animation:aparecer .3s ease}
+@keyframes aparecer{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* calendario */
+.meses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.mes-btn{
+  border:2px solid var(--linea);background:var(--card);border-radius:18px;padding:16px 6px;
+  text-align:center;cursor:pointer;transition:all .2s;font-family:inherit;
+}
+.mes-btn .ic{font-size:1.6rem}
+.mes-btn .nm{font-size:.72rem;font-weight:700;color:var(--texto);margin-top:5px;text-transform:capitalize}
+.mes-btn:active{transform:scale(.95)}
+.dias-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:14px}
+.dia-btn{
+  position:relative;border:2px solid var(--linea);background:var(--card);border-radius:14px;
+  aspect-ratio:1;font-size:.9rem;font-weight:700;color:var(--texto);cursor:pointer;font-family:inherit;
+}
+.dia-btn.hoy{border-color:var(--rose-deep);background:var(--chip)}
+.dia-btn.hecho::after{content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--lilac)}
+.dia-btn:active{transform:scale(.92)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.cal-header h2{font-family:Georgia,serif;font-size:1.2rem;text-transform:capitalize;color:var(--texto)}
+.cal-header button{border:2px solid var(--linea);background:var(--card);border-radius:999px;padding:8px 16px;font-weight:700;color:var(--acento);cursor:pointer;font-family:inherit}
+/* inicio */
+.resumen-hoy{
+  background:linear-gradient(135deg,var(--rose),var(--lilac));border-radius:24px;padding:22px;color:#fff;
+  box-shadow:var(--shadow);text-align:center;
+}
+.resumen-hoy .em{font-size:2.6rem}
+.resumen-hoy h2{font-family:Georgia,serif;font-size:1.3rem;margin:6px 0 2px}
+.resumen-hoy p{font-size:.85rem;opacity:.95}
+.streak{margin-top:14px;display:flex;gap:10px}
+.streak div{flex:1;background:var(--card);border-radius:16px;padding:12px;text-align:center;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.streak b{font-size:1.4rem;color:var(--rose-deep);display:block}
+.streak span{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--texto2)}
+.intro-card{background:var(--card);border-radius:22px;padding:20px;box-shadow:var(--shadow);margin-top:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.intro-card h3{font-family:Georgia,serif;color:var(--acento2);margin-bottom:8px;font-size:1.05rem}
+.intro-card p{font-family:Georgia,serif;font-style:italic;font-size:.92rem;line-height:1.7;color:var(--texto2);white-space:pre-line}
+.btn-instalar{
+  display:none;width:100%;margin-top:14px;border:none;border-radius:16px;padding:14px;font-size:.95rem;font-weight:700;
+  background:linear-gradient(90deg,var(--lilac),var(--rose));color:#fff;cursor:pointer;box-shadow:var(--shadow);
+}
+/* lenguaje simbólico */
+.sim-intro h2{font-family:Georgia,serif;font-size:1.4rem;color:var(--texto);margin-bottom:4px}
+.sim-intro .sub{font-family:Georgia,serif;font-style:italic;color:var(--acento2);margin-bottom:14px;font-size:.95rem}
+.sim-intro p{font-size:.88rem;line-height:1.7;color:var(--texto2);margin-bottom:12px}
+.sim-item{padding:14px 0;border-bottom:1px solid var(--linea)}
+.sim-item h4{font-family:Georgia,serif;font-size:1.05rem;color:var(--texto);display:flex;align-items:center;gap:8px}
+.sim-item h4 .em{font-size:1.3rem}
+.sim-item p{font-size:.88rem;line-height:1.65;color:var(--texto2);margin-top:6px}
+@media (min-width:600px){.meses-grid{grid-template-columns:repeat(4,1fr)}}
+/* ---- dinamismo ---- */
+@keyframes flota{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.emoji-dia{animation:flota 4.5s ease-in-out infinite}
+@keyframes sube{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.card.des-der{animation:desDer .38s ease}
+.card.des-izq{animation:desIzq .38s ease}
+@keyframes desDer{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+@keyframes desIzq{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:none}}
+.card.animar .dia-titulo{animation:sube .45s .04s ease both}
+.card.animar .reflexion{animation:sube .5s .12s ease both}
+.card.animar .invitacion{animation:sube .5s .2s ease both}
+.card.animar .simbolo-tag{animation:sube .5s .26s ease both}
+.card.animar .sec-titulo{animation:sube .45s .1s ease both}
+.card.animar .fila,.card.animar .energia-fila{animation:sube .45s .18s ease both}
+.card.animar textarea.libre{animation:sube .5s .24s ease both}
+@keyframes latido{0%,100%{box-shadow:0 0 0 0 rgba(232,160,191,.5)}50%{box-shadow:0 0 0 14px rgba(232,160,191,0)}}
+.resumen-hoy{animation:latido 3.5s ease-in-out infinite}
+/* respiración consciente */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(26,20,27,.82);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+.overlay.on{display:flex}
+.orbita{position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center}
+.orbita .anillo{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(232,160,191,.4);animation:gira 14s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.circulo{
+  width:170px;height:170px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%,#fde3ee,#e8a0bf 55%,#b48ec9);
+  box-shadow:0 0 70px rgba(232,160,191,.55),inset 0 0 40px rgba(255,255,255,.35);
+  transition:transform 4.2s ease-in-out;
+}
+.circulo.inhala{transform:scale(1.5)}
+.circulo span{color:#fff;font-weight:700;letter-spacing:3px;font-size:1rem;text-transform:uppercase}
+#resp-contador{color:#e8d5e2;margin-top:30px;font-size:.85rem;letter-spacing:.5px}
+.btn-cerrar{margin-top:22px;border:2px solid rgba(232,160,191,.5);background:transparent;color:#f2dcea;
+  border-radius:999px;padding:10px 26px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-cerrar:active{background:rgba(232,160,191,.2)}
+@keyframes apareceSuave{from{opacity:0}to{opacity:1}}
+.overlay.on .orbinda,.overlay.on{animation:apareceSuave .4s ease}
+</style>
+</head>
+<body>
+<div class="petalos" id="petalos"></div>
+
+<header>
+  <div class="tit">
+    <h1>365 días para volver a mí</h1>
+    <p>un día a la vez, una respiración a la vez</p>
+  </div>
+  <button id="btn-tema" title="Cambiar tema">🌙</button>
+</header>
+
+<main>
+  <!-- VISTA HOY -->
+  <section id="vista-hoy" class="vista activa">
+    <div id="mes-nota" class="mes-nota" style="display:none"></div>
+    <div class="card" id="tarjeta-dia">
+      <h2 class="dia-titulo"><span class="em" id="emoji-dia"></span><span id="titulo-dia"></span></h2>
+      <div class="fecha" id="fecha-larga"></div>
+      <p class="reflexion" id="reflexion"></p>
+      <p class="invitacion" id="invitacion"></p>
+      <div class="simbolo-tag" id="chip-simbolo"></div>
+
+      <h3 class="sec-titulo">Registro emocional</h3>
+      <div class="fila"><span class="lbl">Emoción:</span><input type="text" id="f-emocion"></div>
+      <div class="fila"><span class="lbl">Sensación corporal:</span><input type="text" id="f-sensacion"></div>
+      <div class="fila" style="display:block">
+        <span class="lbl">Energía del día:</span>
+        <div class="energia-fila" id="f-energia" style="margin-top:8px">
+          <button data-v="baja">Baja</button><button data-v="media">Media</button><button data-v="alta">Alta</button>
+        </div>
+      </div>
+
+      <h3 class="sec-titulo">Espacio para escritura libre</h3>
+      <textarea class="libre" id="f-libre" placeholder=" "></textarea>
+
+      <button class="btn-resp" id="btn-respirar">🌬️ Respiración consciente</button>
+      <button class="btn-guardar" id="btn-guardar">Guardar mi registro 🌸</button>
+      <div class="nav-dias">
+        <button id="nav-ant">← Anterior</button>
+        <button class="hoy-btn" id="nav-hoy">Hoy</button>
+        <button id="nav-sig">Siguiente →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISTA CALENDARIO -->
+  <section id="vista-cal" class="vista">
+    <div class="card">
+      <div class="cal-header">
+        <button id="cal-atras" style="display:none">← Meses</button>
+        <h2 id="cal-titulo">Elige un mes</h2>
+        <span></span>
+      </div>
+      <div class="meses-grid" id="meses-grid"></div>
+      <div class="dias-grid" id="dias-grid" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- VISTA SÍMBOLOS -->
+  <section id="vista-sim" class="vista">
+    <div class="card">
+      <div class="sim-intro">
+        <h2>Lenguaje simbólico</h2>
+        <p class="sub">El mapa invisible que acompaña el recorrido</p>
+        <p>Cada emoji que aparece a lo largo de este libro no representa un día, sino un <b>estado de conciencia</b>. No indica qué hacer, sino <b>desde dónde mirar</b>.</p>
+        <p>Los símbolos se repiten a lo largo de los meses porque los procesos no son lineales: evolucionan, profundizan, se resignifican.</p>
+        <p>Cuando un símbolo vuelve, no sos la misma persona que lo leyó antes.</p>
+      </div>
+      <div id="lista-simbolos"></div>
+    </div>
+  </section>
+
+  <!-- VISTA INICIO -->
+  <section id="vista-inicio" class="vista">
+    <div class="resumen-hoy" id="resumen-hoy"></div>
+    <div class="streak">
+      <div><b id="st-hechos">0</b><span>días escritos</span></div>
+      <div><b id="st-racha">0</b><span>racha actual</span></div>
+      <div><b id="st-falta">365</b><span>por vivir</span></div>
+    </div>
+    <div class="intro-card">
+      <h3>Donde algo en ti recuerda</h3>
+      <p id="intro-texto"></p>
+    </div>
+    <div class="intro-card">
+      <h3>Palabras de la autora</h3>
+      <p id="autora-texto"></p>
+    </div>
+    <button class="btn-instalar" id="btn-instalar">Instalar la app en mi móvil</button>
+    <button class="btn-instalar" id="btn-notif" style="display:block;background:linear-gradient(90deg,var(--acento2),var(--rose))">🔔 Activar recordatorios (9:00 y 21:00)</button>
+    <p id="notif-estado" style="text-align:center;font-size:.75rem;color:var(--texto2);margin-top:8px"></p>
+  </section>
+</main>
+
+<nav class="barra">
+  <button data-v="hoy" class="activo"><span class="ic">🌸</span>Hoy</button>
+  <button data-v="cal"><span class="ic">📅</span>Calendario</button>
+  <button data-v="sim"><span class="ic">✨</span>Símbolos</button>
+  <button data-v="inicio"><span class="ic">🌙</span>Inicio</button>
+</nav>
+
+<div class="overlay" id="overlay-resp">
+  <div class="orbita">
+    <div class="anillo"></div>
+    <div class="circulo" id="circulo"><span id="resp-texto">Inhala</span></div>
+  </div>
+  <p id="resp-contador"></p>
+  <button class="btn-cerrar" id="resp-cerrar">Cerrar ✕</button>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

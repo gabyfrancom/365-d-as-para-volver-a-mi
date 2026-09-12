@@ -1,4 +1,4 @@
-const CACHE = 'volver-a-mi-v4';
+const CACHE = 'volver-a-mi-v6';
 const ARCHIVOS = ['./', './index.html', './data.js', './manifest.json',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png', './fondo-claro.jpg', './fondo-oscuro.jpg'];
 self.addEventListener('install', e => {

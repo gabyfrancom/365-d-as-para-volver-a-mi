@@ -28,7 +28,7 @@ for (let i=0;i<12;i++){
   $('petalos').appendChild(p);
 }
 
-/* ---------- carga del día (con animación de deslizamiento) ---------- */
+/* ---------- carga del día ---------- */
 function cargarDia(m, d, dir){
   const e = entrada(m,d), s = BOOK.symbols[e.emoji];
   const f = new Date(hoy.getFullYear(), m, d);
@@ -41,7 +41,6 @@ function cargarDia(m, d, dir){
   const lineas = e.text.split('\n');
   $('invitacion').textContent = lineas.length > 1 ? lineas[lineas.length-1] : '';
   $('reflexion').textContent = (lineas.length > 1 ? lineas.slice(0,-1) : lineas).join('\n');
-  // prólogo al iniciar cada mes / epílogo al cerrarlo
   const nota = $('mes-nota'), ultimo = DIAS_MES[m];
   let pl = null;
   if (d === 1) pl = BOOK.prologs.find(p => p.month === MESES[m] && p.type === 'Prólogo');
@@ -50,7 +49,6 @@ function cargarDia(m, d, dir){
     nota.style.display = 'block';
     nota.innerHTML = '<h3>' + (d === 1 ? 'Prólogo' : 'Epílogo') + ' · ' + MESES[m] + '</h3><p>' + pl.text + '</p>';
   } else nota.style.display = 'none';
-  // registro guardado
   const g = guardado(m,d) || {};
   $('f-emocion').value = g.emocion || '';
   $('f-sensacion').value = g.sensacion || '';
@@ -60,7 +58,6 @@ function cargarDia(m, d, dir){
   const btn = $('btn-guardar');
   btn.textContent = g.completo ? 'Registro guardado ✓' : 'Guardar mi registro 🌸';
   btn.classList.toggle('guardado', !!g.completo);
-  // animación
   const card = $('tarjeta-dia');
   card.classList.remove('animar','des-der','des-izq'); void card.offsetWidth;
   if (dir) card.classList.add(dir > 0 ? 'des-der' : 'des-izq');
@@ -86,39 +83,136 @@ document.querySelectorAll('#f-energia button').forEach(b => b.onclick = () => {
   localStorage.setItem('entry_'+clave(mi,dd), JSON.stringify(g));
 });
 
-/* ---------- respiración consciente ---------- */
-let respTimer = null;
-function iniciarRespiracion(){
-  const c = $('circulo'), t = $('resp-texto'), k = $('resp-contador');
-  const TOTAL = 6; let fase = 0;
-  function pinta(inhala){
-    c.classList.toggle('inhala', inhala);
-    t.textContent = inhala ? 'Inhala' : 'Exhala';
-    k.textContent = 'Respiración consciente · ciclo ' + (Math.floor(fase/2)+1) + ' de ' + TOTAL;
-  }
-  pinta(true);
-  respTimer = setInterval(() => {
-    fase++;
-    if (fase >= TOTAL*2){
-      clearInterval(respTimer); respTimer = null;
-      t.textContent = '✦';
-      k.textContent = 'Listo. Gracias por cuidarte 🌸';
-      localStorage.setItem('breath_'+KEY_HOY, '1');
-      setTimeout(() => $('overlay-resp').classList.remove('on'), 1700);
-      return;
-    }
-    pinta(fase % 2 === 0);
-  }, 4200);
+/* ---------- respiraciones conscientes (6 técnicas) ---------- */
+const RESPIRACIONES = [
+  { id:'simple', nombre:'Respiración consciente simple', patron:'Inhala 4 · Exhala 4',
+    desc:'El equilibrio básico. Calma la mente y te ancla al presente.',
+    fases:[{n:'Inhala',d:4},{n:'Exhala',d:4}], ciclos:6 },
+  { id:'diafragma', nombre:'Respiración diafragmática', patron:'Inhala 4 · Exhala 6',
+    desc:'El vientre se infla al inhalar y se suaviza al exhalar. Relaja profundamente.',
+    fases:[{n:'Inhala',d:4},{n:'Exhala',d:6}], ciclos:6 },
+  { id:'coherente', nombre:'Respiración coherente', patron:'Inhala 5 · Exhala 5',
+    desc:'5-5 equilibra el sistema nervioso y eleva la claridad emocional.',
+    fases:[{n:'Inhala',d:5},{n:'Exhala',d:5}], ciclos:8 },
+  { id:'caja', nombre:'Respiración cuadrada', patron:'Inhala 4 · Sostén 4 · Exhala 4 · Sostén 4',
+    desc:'Usada por los Navy SEALs. Enfoca y estabiliza bajo presión.',
+    fases:[{n:'Inhala',d:4},{n:'Sostén',d:4},{n:'Exhala',d:4},{n:'Sostén',d:4}], ciclos:5 },
+  { id:'478', nombre:'Respiración 4-7-8', patron:'Inhala 4 · Sostén 7 · Exhala 8',
+    desc:'La favorita para conciliar el sueño y soltar la ansiedad.',
+    fases:[{n:'Inhala',d:4},{n:'Sostén',d:7},{n:'Exhala',d:8}], ciclos:4 },
+  { id:'nadi', nombre:'Respiración alterna (Nadi Shodhana)', patron:'Inhala 4 · Exhala 4 · cambia de fosa',
+    desc:'Cierra una fosa nasal con el pulgar y alterna. Equilibra energía y emociones.',
+    fases:[{n:'Inhala izquierda',d:4},{n:'Exhala derecha',d:4},
+           {n:'Inhala derecha',d:4},{n:'Exhala izquierda',d:4}], ciclos:4 }
+];
+
+let respTimer = null, audioCtx = null, tecnicaActual = null;
+let sonidoOn = localStorage.getItem('sonidoResp') !== 'off';
+
+function sonidoRespiracion(tipo, dur){
+  if (!sonidoOn) return;
+  try{
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const t0 = audioCtx.currentTime, d = Math.max(dur - 0.15, 1);
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = 'sine';
+    if (tipo === 'f-inhala'){ osc.frequency.setValueAtTime(196,t0); osc.frequency.linearRampToValueAtTime(392,t0+d); }
+    else if (tipo === 'f-exhala'){ osc.frequency.setValueAtTime(392,t0); osc.frequency.linearRampToValueAtTime(196,t0+d); }
+    else { osc.frequency.setValueAtTime(294,t0); }
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(0.10,t0+d*0.3);
+    g.gain.linearRampToValueAtTime(0.0001,t0+d);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(t0); osc.stop(t0+d+0.05);
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*d, audioCtx.sampleRate);
+    const ch = buf.getChannelData(0);
+    for (let i=0;i<ch.length;i++) ch[i] = Math.random()*2-1;
+    const noise = audioCtx.createBufferSource(); noise.buffer = buf;
+    const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.6;
+    const base = tipo === 'f-sosten' ? 620 : 420;
+    bp.frequency.setValueAtTime(base,t0);
+    bp.frequency.linearRampToValueAtTime(tipo === 'f-inhala' ? 880 : base*0.6, t0+d);
+    const g2 = audioCtx.createGain();
+    g2.gain.setValueAtTime(0,t0);
+    g2.gain.linearRampToValueAtTime(0.04,t0+d*0.4);
+    g2.gain.linearRampToValueAtTime(0.0001,t0+d);
+    noise.connect(bp).connect(g2).connect(audioCtx.destination);
+    noise.start(t0); noise.stop(t0+d+0.05);
+  }catch(err){}
 }
+function actualizarBtnSonido(){
+  $('resp-sonido').textContent = sonidoOn ? '🔊 Sonido: activado' : '🔇 Sonido: desactivado';
+}
+$('resp-sonido').onclick = () => {
+  sonidoOn = !sonidoOn;
+  localStorage.setItem('sonidoResp', sonidoOn ? 'on' : 'off');
+  actualizarBtnSonido();
+};
+
+function detenerRespiracion(){
+  if (respTimer){ clearTimeout(respTimer); respTimer = null; }
+}
+function iniciarSesion(t){
+  tecnicaActual = t;
+  $('resp-elegir').style.display = 'none';
+  $('resp-sesion').style.display = 'flex';
+  $('resp-tecnica').textContent = t.nombre + ' · ' + t.patron;
+  iniciarRespiracion(t);
+}
+function iniciarRespiracion(t){
+  detenerRespiracion();
+  const c = $('circulo'), tx = $('resp-texto'), k = $('resp-contador');
+  let faseIdx = 0;
+  function pinta(){
+    const f = t.fases[faseIdx];
+    c.style.transitionDuration = f.d + 's';
+    c.classList.remove('f-inhala','f-sosten','f-exhala'); void c.offsetWidth;
+    const tipo = f.n.startsWith('Inhala') ? 'f-inhala' : f.n.startsWith('Sost') ? 'f-sosten' : 'f-exhala';
+    c.classList.add(tipo);
+    tx.textContent = f.n;
+    k.textContent = 'ciclo ' + (Math.floor(faseIdx/t.fases.length)+1) + ' de ' + t.ciclos;
+    sonidoRespiracion(tipo, f.d);
+    respTimer = setTimeout(() => {
+      faseIdx++;
+      if (faseIdx >= t.fases.length * t.ciclos){
+        tx.textContent = '✦';
+        k.textContent = 'Listo. Gracias por cuidarte 🌸';
+        localStorage.setItem('breath_'+KEY_HOY, '1');
+        setTimeout(() => $('overlay-resp').classList.remove('on'), 1800);
+        return;
+      }
+      pinta();
+    }, f.d * 1000);
+  }
+  pinta();
+}
+
+/* selector de técnicas */
+RESPIRACIONES.forEach(t => {
+  const b = document.createElement('button'); b.className = 'resp-card';
+  b.innerHTML = '<b>' + t.nombre + '</b><span class="patron">' + t.patron +
+    '</span><small>' + t.desc + '</small>';
+  b.onclick = () => iniciarSesion(t);
+  $('lista-resp').appendChild(b);
+});
 $('btn-respirar').onclick = () => {
+  detenerRespiracion();
   $('overlay-resp').classList.add('on');
-  if (respTimer) clearInterval(respTimer);
-  iniciarRespiracion();
+  $('resp-elegir').style.display = 'block';
+  $('resp-sesion').style.display = 'none';
 };
-$('resp-cerrar').onclick = () => {
-  if (respTimer){ clearInterval(respTimer); respTimer = null; }
+$('resp-cambiar').onclick = () => {
+  detenerRespiracion();
+  $('resp-sesion').style.display = 'none';
+  $('resp-elegir').style.display = 'block';
+};
+function cerrarRespiracion(){
+  detenerRespiracion();
   $('overlay-resp').classList.remove('on');
-};
+}
+$('resp-cerrar').onclick = cerrarRespiracion;
+$('resp-cerrar-sesion').onclick = cerrarRespiracion;
 
 /* ---------- notificaciones 9:00 y 21:00 ---------- */
 function mostrarNotif(titulo, cuerpo){

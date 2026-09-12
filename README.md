@@ -23,3 +23,5 @@ HTML · CSS · JavaScript · PWA (Service Worker + Manifest)
 - Botón Guardar en degradado lila-sakura con brillo animado
 - Respiración consciente guiada (círculo animado inhala/exhala)
 - Notificaciones locales 9:00 y 21:00 si falta la frase o la respiración
+- Respiración: inhala en lila / exhala en rosa, con guía de audio (Web Audio API)
+- 6 técnicas de respiración guiada (simple, diafragmática, coherente, cuadrada, 4-7-8, Nadi Shodhana)
